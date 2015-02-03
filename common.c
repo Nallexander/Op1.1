@@ -78,8 +78,9 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 
 	/* TODO: roll the dice, but before that, get a seed from the parent */
 	printf("seed_fd_rd = %d, score_fd_wr = %d\n", seed_fd_rd, score_fd_wr);
+	close(score_fd_wr);
 	printf("Reading from buffer: %d \n", seed_fd_rd);
-	seed = read(4, buffer, sizeof(buffer));
+	seed = read(seed_fd_rd, buffer, sizeof(buffer));
 	printf("Read from buffer: %d\n", seed_fd_rd);
 
 	srand(seed);

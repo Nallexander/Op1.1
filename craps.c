@@ -34,29 +34,32 @@ int main(int argc, char *argv[])
 
 	char arg0[] = "./shooter";
 	char arg1[10];
-	char *args[] = {arg0, arg1, NULL};
+	char arg2[2];
+	char *args[] = {arg0, arg1, arg2, NULL};
+
+
 
 	pid_t pid;
 	int pfd[2];
 	int send_pipe[6][2]; 
-	int recieve_pipe[6][2];
 
 	/* TODO: initialize the communication with the players */
 	for (i = 0; i < NUM_PLAYERS; i++) {
 	  pipe(send_pipe[i]);
-	  pipe(recieve_pipe[i]);
 	}
 
 	for (i = 0; i < NUM_PLAYERS; i++) {
-		/* TODO: spawn the processes that simulate the players */	  	
+		/* TODO: spawn the processes that simulate the players */	      
 	  switch(pid=fork()){
 	  case -1: // ERROR
 	    perror("Could not create child process!\n");
 	    exit(EXIT_FAILURE);
 	  case 0: // CHILD PROCESS
 	    // SHOOTER
+	    arg2[0] = send_pipe[i][0];
+	    arg2[1] = send_pipe[i][1];
+	    printf("Executing in child process!\n");	    
 	    execv(arg0, args);
-	    printf("Executing in child process!\n");
 	    exit(EXIT_SUCCESS);
 	  default: // PARENT PROCESS
 	    printf("Executing in parent process!\n");

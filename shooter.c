@@ -17,10 +17,11 @@
 int main(int argc, char *argv[])
 {
 	int id = 0;
-	int seed_rd_fd = STDIN_FILENO;
-	int score_wr_fd = STDOUT_FILENO;
+	int seed_rd_fd = argv[2][0];
+	int score_wr_fd = argv[2][1];
+	printf("seed_rd_fd = %d\n", seed_rd_fd);
 
-	if (argc == 2)
+	if (argc == 3)
 		id = strtol(argv[1], NULL, 10);
 
 	shooter(id, seed_rd_fd, score_wr_fd);
