@@ -76,13 +76,13 @@ int main(int argc, char *argv[])
 		close(send_pipe[i][1]);
 		printf("Sent %d to %d\n", seed, send_pipe[i][1]);
 	}
-
+	printf("Master waiting for children\n");
 	/* TODO: get the dice results from the players, find the winner */
 	for (i = 0; i < NUM_PLAYERS; i++) {
-
+	  pid = wait(&pid);
 	}
-	printf("Master waiting for children\n");
-	pid = wait(&pid);
+	
+	
 	printf("master: player %d WINS\n", winner);
 	
 	/* TODO: signal the winner */
