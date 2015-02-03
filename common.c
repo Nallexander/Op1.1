@@ -65,7 +65,7 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 {
 	pid_t pid;
 	int score, seed = 0;
-	int buffer[128];
+	int buffer[2];
 
 	/* TODO: Install SIGUSR1 handler */
 
@@ -77,9 +77,11 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 		id, (long)pid);
 
 	/* TODO: roll the dice, but before that, get a seed from the parent */
-	
-	//seed = read(seed_fd_rd, buffer, sizeof(buffer));
-	
+	printf("seed_fd_rd = %d, score_fd_wr = %d\n", seed_fd_rd, score_fd_wr);
+	printf("Reading from buffer: %d \n", seed_fd_rd);
+	seed = read(4, buffer, sizeof(buffer));
+	printf("Read from buffer: %d\n", seed_fd_rd);
+
 	srand(seed);
 	score = rand() % 10000;
 	

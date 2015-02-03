@@ -38,11 +38,13 @@ int main(int argc, char *argv[])
 
 	pid_t pid;
 	int pfd[2];
-	int descript_no[6][2]; 
+	int send_pipe[6][2]; 
+	int recieve_pipe[6][2];
 
 	/* TODO: initialize the communication with the players */
 	for (i = 0; i < NUM_PLAYERS; i++) {
-	  pipe(descript_no[i]);
+	  pipe(send_pipe[i]);
+	  pipe(recieve_pipe[i]);
 	}
 
 	for (i = 0; i < NUM_PLAYERS; i++) {
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
 	    exit(EXIT_SUCCESS);
 	  default: // PARENT PROCESS
 	    printf("Executing in parent process!\n");
-	    pid = wait(&pid);
+	    printf("Child ID: %ld\n", (long) &pid);
 	    break;
 	  }
 	}
@@ -69,18 +71,22 @@ int main(int argc, char *argv[])
 	for (i = 0; i < NUM_PLAYERS; i++) {
 		seed++;
 		/* TODO: send the seed to the players */ 
-		close(descript_no[i][0]);
-		write(descript_no[i], &seed, sizeof(seed));
-		printf("Wrote %d to %d\n", seed, descript_no[i]);
+		close(send_pipe[i][0]);
+		write(send_pipe[i][1], seed, sizeof(seed));
+		close(send_pipe[i][1]);
+		printf("Sent %d to %d\n", seed, send_pipe[i][1]);
 	}
 
 	/* TODO: get the dice results from the players, find the winner */
 	for (i = 0; i < NUM_PLAYERS; i++) {
 
 	}
+	printf("Master waiting for children\n");
+	pid = wait(&pid);
 	printf("master: player %d WINS\n", winner);
-
+	
 	/* TODO: signal the winner */
+
 
 	/* TODO: signal all players the end of game */
 	for (i = 0; i < NUM_PLAYERS; i++) {
