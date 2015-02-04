@@ -78,11 +78,11 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 
 	/* TODO: roll the dice, but before that, get a seed from the parent */
 	printf("seed_fd_rd = %d, score_fd_wr = %d\n", seed_fd_rd, score_fd_wr);
-	close(score_fd_wr);
-	open(seed_fd_rd);
+	
+	
 	printf("Reading from buffer: %d \n", seed_fd_rd);
 	read_fault = read(seed_fd_rd, &seed, sizeof(int));
-	close(seed_fd_rd);
+	
 	if (read_fault == -1) {
 	  perror("Read from child failed!\n");
 	}
@@ -97,10 +97,10 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 	//char score_array[2];
 	//score_array[0] = score;
 	//score_array[1] = NULL;
-	open(score_fd_wr);
+	
 	write(score_fd_wr, &score, sizeof(int));
 	printf("Child sent score with descriptor %d\n", score_fd_wr);
-	close(score_fd_wr);
+	
 	/* spin while I wait for the results */
 	while (!results); //Remove !------------------------
 

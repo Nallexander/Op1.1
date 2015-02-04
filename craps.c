@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 	    printf("Exiting\n");
 	    exit(EXIT_SUCCESS);
 	  default: // PARENT PROCESS
+	    close(send_pipe[i][0]);
 	    printf("Executing in parent process!\n");
 	    printf("Child ID: %ld\n", (long) &pid);
 	    break;
@@ -87,9 +88,9 @@ int main(int argc, char *argv[])
 	for (i = 0; i < NUM_PLAYERS; i++) {
 		seed++;
 		/* TODO: send the seed to the players */ 
-		close(send_pipe[i][0]);
+		
 		write(send_pipe[i][1], &seed, sizeof(int));
-		close(send_pipe[i][1]);
+		
 		printf("Sent %d to %d\n", &seed, send_pipe[i][1]);
 	}
 	printf("Master waiting for children\n");
@@ -97,9 +98,9 @@ int main(int argc, char *argv[])
 	int results = 0;
 	for (i = 0; i < NUM_PLAYERS; i++) {
 	  printf("Waiting for child to return score with descriptor %d\n", recieve_pipe[i][0]);
-	  open(recieve_pipe[i][0]);
+	  
 	  read(recieve_pipe[i][0], &results, sizeof(int)); 
-	  close(recieve_pipe[i][0]);
+	  
 	  
 	}
 	
@@ -111,15 +112,16 @@ int main(int argc, char *argv[])
 
 	/* TODO: signal all players the end of game */
 	for (i = 0; i < NUM_PLAYERS; i++) {
-	  close(pfd[0]);
-	  pid = wait(&pid);
+	  
+	  
 	}
 
 	printf("master: the game ends\n");
 
 	/* TODO: cleanup resources and exit with success */
 	for (i = 0; i < NUM_PLAYERS; i++) {
-
+	  pid = wait(&pid);
+	  close(send_pipe[i][1]);
 	}
 
 	return 0;
