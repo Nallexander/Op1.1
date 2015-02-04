@@ -64,8 +64,8 @@ void win_handler(int signum)
 void shooter(int id, int seed_fd_rd, int score_fd_wr)
 {
 	pid_t pid;
-	int score, seed = 0;
-	int buffer[2];
+	int score, seed, read_fault = 0;
+	int buffer[] = {0, 0};
 
 	/* TODO: Install SIGUSR1 handler */
 
@@ -79,14 +79,19 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 	/* TODO: roll the dice, but before that, get a seed from the parent */
 	printf("seed_fd_rd = %d, score_fd_wr = %d\n", seed_fd_rd, score_fd_wr);
 	close(score_fd_wr);
+	open(seed_fd_rd);
 	printf("Reading from buffer: %d \n", seed_fd_rd);
-	seed = read(seed_fd_rd, buffer, sizeof(buffer));
-	printf("Read from buffer: %d\n", seed_fd_rd);
+	read_fault = read(seed_fd_rd, buffer, sizeof(buffer));
+	if (read_fault == -1) {
+	  printf("Read from child %ld failed!\n", (long) pid);
+	}
+	seed = buffer[0];
+	printf("Read seed from buffer: %d\n", seed);
 
 	srand(seed);
 	score = rand() % 10000;
 	
-	fprintf(stderr, "player %d: I scored %d (PID = %ld\n", id, score, (long)pid);
+	fprintf(stderr, "player %d: I scored %d (PID = %ld)\n", id, score, (long)pid);
 	/* TODO: send my score back */
 
 	/* spin while I wait for the results */

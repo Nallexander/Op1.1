@@ -34,7 +34,8 @@ int main(int argc, char *argv[])
 
 	char arg0[] = "./shooter";
 	char arg1[10];
-	char arg2[2];
+	char arg2[3];
+	arg2[2] = NULL;
 	char *args[] = {arg0, arg1, arg2, NULL};
 
 
@@ -42,10 +43,12 @@ int main(int argc, char *argv[])
 	pid_t pid;
 	int pfd[2];
 	int send_pipe[6][2]; 
+	int recieve_pipe[6][2]; 
 
 	/* TODO: initialize the communication with the players */
 	for (i = 0; i < NUM_PLAYERS; i++) {
 	  pipe(send_pipe[i]);
+	  pipe(recieve_pipe[i]);
 	}
 
 	for (i = 0; i < NUM_PLAYERS; i++) {
@@ -56,10 +59,14 @@ int main(int argc, char *argv[])
 	    exit(EXIT_FAILURE);
 	  case 0: // CHILD PROCESS
 	    // SHOOTER
-	    arg2[0] = send_pipe[i][0];
-	    arg2[1] = send_pipe[i][1];
+	    dup2(send_pipe[i][0], arg2[0]);
+	    printf("SEND_PIPE[i][0] = %d\narg2[0] = %d\n", send_pipe[i][0], arg2[0]);
+	    dup2(recieve_pipe[i][1], arg2[1]);
 	    printf("Executing in child process!\n");	    
+	    sprintf(arg1, "%d", i);
 	    execv(arg0, args);
+
+	    printf("Exiting\n");
 	    exit(EXIT_SUCCESS);
 	  default: // PARENT PROCESS
 	    printf("Executing in parent process!\n");
@@ -70,7 +77,7 @@ int main(int argc, char *argv[])
 
 	//seed = (int)(srand((unsigned)time(NULL)^getpid()));
 	//int test = RAND();
-	seed = rand();
+	seed = time(NULL);
 	for (i = 0; i < NUM_PLAYERS; i++) {
 		seed++;
 		/* TODO: send the seed to the players */ 
