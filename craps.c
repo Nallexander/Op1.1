@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	char arg1[10];
 	char arg2[3];
 	arg2[2] = NULL;
-	char *args[] = {arg0, arg1, arg2, NULL};
+	char *args[] = {arg0, arg1, NULL};
 
 
 
@@ -59,13 +59,18 @@ int main(int argc, char *argv[])
 	    exit(EXIT_FAILURE);
 	  case 0: // CHILD PROCESS
 	    // SHOOTER
-	    dup2(send_pipe[i][0], arg2[0]);
+	    shooter(i, send_pipe[i][0], recieve_pipe[i][1]);
+	    /*if (dup2(send_pipe[i][0], STDIN_FILENO) < 0){
+	      perror("Duplicate send descriptor failed!");
+	      }
+	    if (dup2(recieve_pipe[i][1], STDOUT_FILENO) < 0){
+	      perror("Duplicate recieve descriptor failed!");
+	      }
 	    printf("SEND_PIPE[i][0] = %d\narg2[0] = %d\n", send_pipe[i][0], arg2[0]);
-	    dup2(recieve_pipe[i][1], arg2[1]);
 	    printf("Executing in child process!\n");	    
 	    sprintf(arg1, "%d", i);
 	    execv(arg0, args);
-
+	    */
 	    printf("Exiting\n");
 	    exit(EXIT_SUCCESS);
 	  default: // PARENT PROCESS
@@ -78,18 +83,24 @@ int main(int argc, char *argv[])
 	//seed = (int)(srand((unsigned)time(NULL)^getpid()));
 	//int test = RAND();
 	seed = time(NULL);
+	printf("seed = %d", seed);
 	for (i = 0; i < NUM_PLAYERS; i++) {
 		seed++;
 		/* TODO: send the seed to the players */ 
 		close(send_pipe[i][0]);
-		write(send_pipe[i][1], seed, sizeof(seed));
+		write(send_pipe[i][1], &seed, sizeof(int));
 		close(send_pipe[i][1]);
-		printf("Sent %d to %d\n", seed, send_pipe[i][1]);
+		printf("Sent %d to %d\n", &seed, send_pipe[i][1]);
 	}
 	printf("Master waiting for children\n");
 	/* TODO: get the dice results from the players, find the winner */
+	int results = 0;
 	for (i = 0; i < NUM_PLAYERS; i++) {
-	  pid = wait(&pid);
+	  printf("Waiting for child to return score with descriptor %d\n", recieve_pipe[i][0]);
+	  open(recieve_pipe[i][0]);
+	  read(recieve_pipe[i][0], &results, sizeof(int)); 
+	  close(recieve_pipe[i][0]);
+	  
 	}
 	
 	
@@ -101,6 +112,7 @@ int main(int argc, char *argv[])
 	/* TODO: signal all players the end of game */
 	for (i = 0; i < NUM_PLAYERS; i++) {
 	  close(pfd[0]);
+	  pid = wait(&pid);
 	}
 
 	printf("master: the game ends\n");

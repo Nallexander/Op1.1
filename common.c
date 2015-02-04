@@ -81,21 +81,28 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 	close(score_fd_wr);
 	open(seed_fd_rd);
 	printf("Reading from buffer: %d \n", seed_fd_rd);
-	read_fault = read(seed_fd_rd, buffer, sizeof(buffer));
+	read_fault = read(seed_fd_rd, &seed, sizeof(int));
+	close(seed_fd_rd);
 	if (read_fault == -1) {
-	  printf("Read from child %ld failed!\n", (long) pid);
+	  perror("Read from child failed!\n");
 	}
-	seed = buffer[0];
+	//seed = buffer[0];
 	printf("Read seed from buffer: %d\n", seed);
 
 	srand(seed);
-	score = rand() % 10000;
+	score = rand() % 6;
 	
 	fprintf(stderr, "player %d: I scored %d (PID = %ld)\n", id, score, (long)pid);
 	/* TODO: send my score back */
-
+	//char score_array[2];
+	//score_array[0] = score;
+	//score_array[1] = NULL;
+	open(score_fd_wr);
+	write(score_fd_wr, &score, sizeof(int));
+	printf("Child sent score with descriptor %d\n", score_fd_wr);
+	close(score_fd_wr);
 	/* spin while I wait for the results */
-	while (!results) ;
+	while (!results); //Remove !------------------------
 
 	if (winner)
 		fprintf(stderr, "player %d: Walking away rich\n", id);
