@@ -22,7 +22,7 @@
 volatile sig_atomic_t winner = 0;
 /* TODO: Change this to 0 to make the children spin in the for loop before they
    receive the SIGUSR2 signal */
-volatile sig_atomic_t results = 1;
+volatile sig_atomic_t results = 0;
 
 /**
  * end_handler - handle the SIGUSR2 signal, the player will receive
@@ -32,7 +32,9 @@ volatile sig_atomic_t results = 1;
 void end_handler(int signum)
 {
 	/* TODO: Check that the signum is indeed SIGUSR2 */
-	
+  if (signum == SIGUSR2){
+    results = 1;
+  }	
 	/* TODO: "leave the game" make the appropriate changes to let the
 	   current process exit*/
 
@@ -47,7 +49,9 @@ void end_handler(int signum)
 void win_handler(int signum)
 {
 	/* TODO - Check that the signum is indeed SIGUSR1 */
-
+  if (signum == SIGUSR1){
+    winner = 1;
+  }
 	/* TODO - this player is the winner, make the appropriate changes
 	   upon reception of this singal */
 
@@ -68,41 +72,31 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 	int buffer[] = {0, 0};
 
 	/* TODO: Install SIGUSR1 handler */
+	signal(SIGUSR1, win_handler);
 
 	/* TODO: Install SIGUSR2 handler */
-
+	signal(SIGUSR2, end_handler);
 
 	pid = getpid();
 	fprintf(stderr, "player %d: I'm in this game (PID = %ld)\n",
 		id, (long)pid);
 
 	/* TODO: roll the dice, but before that, get a seed from the parent */
-	printf("seed_fd_rd = %d, score_fd_wr = %d\n", seed_fd_rd, score_fd_wr);
-	
-	
-	printf("Reading from buffer: %d \n", seed_fd_rd);
 	read_fault = read(seed_fd_rd, &seed, sizeof(int));
 	
 	if (read_fault == -1) {
 	  perror("Read from child failed!\n");
 	}
-	//seed = buffer[0];
-	printf("Read seed from buffer: %d\n", seed);
 
 	srand(seed);
-	score = rand() % 6;
+	score = rand() % 10000;
 	
 	fprintf(stderr, "player %d: I scored %d (PID = %ld)\n", id, score, (long)pid);
-	/* TODO: send my score back */
-	//char score_array[2];
-	//score_array[0] = score;
-	//score_array[1] = NULL;
 	
 	write(score_fd_wr, &score, sizeof(int));
-	printf("Child sent score with descriptor %d\n", score_fd_wr);
 	
 	/* spin while I wait for the results */
-	while (!results); //Remove !------------------------
+	while (!results); 
 
 	if (winner)
 		fprintf(stderr, "player %d: Walking away rich\n", id);
@@ -111,7 +105,9 @@ void shooter(int id, int seed_fd_rd, int score_fd_wr)
 		id, (long)pid);
 
 	/* TODO: free resources and exit with success */
-
+	close(seed_fd_rd);
+	close(score_fd_wr);
+	
 	exit(EXIT_SUCCESS);
 }
 

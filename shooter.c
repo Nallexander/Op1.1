@@ -19,13 +19,9 @@ int main(int argc, char *argv[])
 	int id = 0;
 	int seed_rd_fd = STDIN_FILENO;
 	int score_wr_fd = STDOUT_FILENO;
-	printf("STDIN_FILENO: %d\n", STDIN_FILENO);
-	printf("STDOUT_FILENO: %d\n", STDOUT_FILENO);
-	printf("seed_rd_fd = %d\n", seed_rd_fd);
-
 	if (argc == 2)
 		id = strtol(argv[1], NULL, 10);
-
+	printf("ID: %d\n", id);
 	shooter(id, seed_rd_fd, score_wr_fd);
 	
 	return 0;
